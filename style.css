@@ -22,3 +22,22 @@ a {
   color: #00ffcc;
   text-decoration: none;
 }
+
+/* Responsive Mobile View */
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+  #hud {
+    width: 95%;
+    padding: 10px;
+  }
+  button {
+    width: 90%;
+    margin-top: 10px;
+    font-size: 1.2em;
+  }
+  #clock, #status, #broadcast, #lore {
+    font-size: 1.1em;
+  }
+}
