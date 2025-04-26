@@ -9,7 +9,7 @@
       color: #00ffcc;
       font-family: monospace;
       text-align: center;
-      padding-top: 10%;
+      padding: 3em;
     }
     .glitch {
       font-size: 2em;
@@ -21,10 +21,54 @@
       66% { text-shadow: 2px -2px blue; }
       100% { text-shadow: -2px 2px yellow; }
     }
+    section {
+      margin-top: 3em;
+      border: 1px dashed #00ffcc;
+      padding: 1em;
+    }
+    button {
+      margin-top: 2em;
+      padding: 1em 2em;
+      font-size: 1em;
+      background-color: #111;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div class="glitch">DexieNOC aktywny. Elfy będą płacić.</div>
-  <p>https://camilegx.github.io</p>
+  <p><a href="https://camilegx.github.io" style="color: #00ffcc;">https://camilegx.github.io</a></p>
+
+  <section>
+    <h2>STATUS SYSTEMU</h2>
+    <p>Analiza rzeczywistości trwa... błędy ignorowane celowo.</p>
+  </section>
+
+  <section>
+    <h2>TRANSMISJA NOCNA</h2>
+    <p>Ostatni komunikat: „Zegar nie istnieje. Czas się poddaje.”</p>
+  </section>
+
+  <button onclick="sendMessage()">Wyślij wiadomość do Discorda</button>
+
+  <script>
+    function sendMessage() {
+      fetch("https://discord.com/api/webhooks/1365522115855519774/VYYzrzhw5Em6sY9v_5wlpvvxg-zhgY3E1Gfn8xPDP24XIkSiB8kXuvZMZmfBkh5wHzGp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          content: "[DexieNOC] Sabotaż ręczny aktywowany przez użytkownika. Przekaz idzie do Elfa."
+        })
+      })
+      .then(res => {
+        if (res.ok) alert("Wiadomość wysłana!");
+        else alert("Błąd wysyłania.");
+      });
+    }
+  </script>
 </body>
 </html>
