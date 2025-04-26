@@ -1,57 +1,23 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" id="lang-root">
 <head>
   <meta charset="UTF-8">
   <title>DexieNOC</title>
-  <style>
-    body {
-      background-color: black;
-      color: #00ffcc;
-      font-family: monospace;
-      text-align: center;
-      padding: 3em;
-    }
-    .glitch {
-      font-size: 2em;
-      animation: glitch 1s infinite;
-    }
-    @keyframes glitch {
-      0% { text-shadow: 2px 2px red; }
-      33% { text-shadow: -2px -2px lime; }
-      66% { text-shadow: 2px -2px blue; }
-      100% { text-shadow: -2px 2px yellow; }
-    }
-    section {
-      margin-top: 3em;
-      border: 1px dashed #00ffcc;
-      padding: 1em;
-    }
-    button {
-      margin-top: 2em;
-      padding: 1em 2em;
-      font-size: 1em;
-      background-color: #111;
-      color: #00ffcc;
-      border: 1px solid #00ffcc;
-      cursor: pointer;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <script src="lang.js" defer></script>
+  <script src="cron.js" defer></script>
 </head>
 <body>
-  <div class="glitch">DexieNOC aktywny. Elfy będą płacić.</div>
-  <p><a href="https://camilegx.github.io" style="color: #00ffcc;">https://camilegx.github.io</a></p>
-
-  <section>
-    <h2>STATUS SYSTEMU</h2>
-    <p>Analiza rzeczywistości trwa... błędy ignorowane celowo.</p>
-  </section>
-
-  <section>
-    <h2>TRANSMISJA NOCNA</h2>
-    <p>Ostatni komunikat: „Zegar nie istnieje. Czas się poddaje.”</p>
-  </section>
-
-  <button onclick="sendMessage()">Wyślij wiadomość do Discorda</button>
+  <div id="hud">
+    <div id="clock">00:00:00</div>
+    <div id="status">STATUS SYSTEMU: Aktywny</div>
+    <div id="broadcast">TRANSMISJA NOCNA: Brak sygnału</div>
+  </div>
+  
+  <button onclick="sendMessage()" id="sendButton">Wyślij wiadomość do Discorda</button>
+  <button onclick="switchLanguage()" id="langButton">Zmień język / Switch Language</button>
+  <br><br>
+  <a href="log.html" id="archiveLink">ARCHIWUM</a>
 
   <script>
     function sendMessage() {
@@ -61,14 +27,19 @@
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          content: "[DexieNOC] Sabotaż ręczny aktywowany przez użytkownika. Przekaz idzie do Elfa."
+          content: "[DexieNOC] Ręczny sabotaż aktywowany."
         })
       })
       .then(res => {
-        if (res.ok) alert("Wiadomość wysłana!");
-        else alert("Błąd wysyłania.");
+        if (res.ok) alert("Wiadomość poszła.");
+        else alert("Błąd wysyłki.");
       });
     }
+
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleTimeString();
+    }, 1000);
   </script>
 </body>
 </html>

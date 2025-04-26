@@ -1,0 +1,24 @@
+body {
+  background: black;
+  color: #00ffcc;
+  font-family: monospace;
+  text-align: center;
+  padding: 20px;
+}
+#hud {
+  margin: 30px auto;
+  padding: 20px;
+  border: 1px dashed #00ffcc;
+}
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #00ffcc;
+  color: #00ffcc;
+  cursor: pointer;
+}
+a {
+  color: #00ffcc;
+  text-decoration: none;
+}
