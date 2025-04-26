@@ -1,21 +1,21 @@
 const translations = {
   pl: {
-    clock: "Czas:",
     status: "STATUS SYSTEMU: Aktywny",
     broadcast: "TRANSMISJA NOCNA: Brak sygnału",
     sendButton: "Wyślij wiadomość do Discorda",
     langButton: "Zmień język / Switch Language",
     archiveLink: "ARCHIWUM",
-    archiveTitle: "ARCHIWUM"
+    archiveTitle: "ARCHIWUM",
+    newLoreButton: "Nowy raport"
   },
   en: {
-    clock: "Time:",
     status: "SYSTEM STATUS: Active",
     broadcast: "NIGHT TRANSMISSION: No signal",
     sendButton: "Send message to Discord",
     langButton: "Switch Language / Zmień język",
     archiveLink: "ARCHIVE",
-    archiveTitle: "ARCHIVE"
+    archiveTitle: "ARCHIVE",
+    newLoreButton: "New report"
   }
 };
 
@@ -35,6 +35,9 @@ function applyTranslations() {
   document.getElementById("archiveLink").innerText = translations[currentLang].archiveLink;
   if(document.getElementById("archiveTitle")) {
     document.getElementById("archiveTitle").innerText = translations[currentLang].archiveTitle;
+  }
+  if(document.getElementById("newLoreButton")) {
+    document.getElementById("newLoreButton").innerText = translations[currentLang].newLoreButton;
   }
 }
 
