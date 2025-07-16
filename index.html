@@ -1,43 +1,45 @@
 <!DOCTYPE html>
-<html lang="pl" id="lang-root">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DexieNOC 2.2 - Raporty Elfów Mobile</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="lang.js" defer></script>
-  <script src="lore.js" defer></script>
+  <title>DexieNOC Neon Terminal</title>
+  <style>
+    body {
+      background-color: #0f0f1a;
+      color: #00ffcc;
+      font-family: monospace;
+      margin: 0;
+      padding: 2rem;
+    }
+    .terminal {
+      background-color: #111;
+      padding: 2rem;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #00ffcc;
+      animation: pulse 2s infinite;
+    }
+    h1 {
+      color: #ff00ff;
+      text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+    }
+    .line {
+      margin-bottom: 1rem;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 20px #00ffcc; }
+      50% { box-shadow: 0 0 40px #00ffcc; }
+      100% { box-shadow: 0 0 20px #00ffcc; }
+    }
+  </style>
 </head>
 <body>
-  <div id="hud">
-    <div id="clock">00:00:00</div>
-    <div id="status">STATUS SYSTEMU: Aktywny</div>
-    <div id="broadcast">TRANSMISJA NOCNA: Brak sygnału</div>
-    <div id="lore">RAPORT ELFÓW: Brak danych</div>
+  <div class="terminal">
+    <h1>DexieNOC Uplink</h1>
+    <div class="line">> Operator: KC // Mode: Dexie 2.1</div>
+    <div class="line">> Protocol: Toast 2.1 Initialized</div>
+    <div class="line">> Observer: Humphrey ACTIVE // Shadowmode</div>
+    <div class="line">> Neon breach detected // Pulse engaged</div>
   </div>
-
-  <button onclick="sendMessage()" id="sendButton">Wyślij wiadomość do Discorda</button>
-  <button onclick="switchLanguage()" id="langButton">Zmień język / Switch Language</button>
-  <button onclick="newLore()" id="newLoreButton">Nowy raport</button>
-  <br><br>
-  <a href="log.html" id="archiveLink">ARCHIWUM</a>
-
-  <script>
-    function sendMessage() {
-      fetch('https://discord.com/api/webhooks/1365522115855519774/VYYzrzhw5Em6sY9v_5wlpvvxg-zhgY3E1Gfn8xPDP24XIkSiB8kXuvZMZmfBkh5wHzGp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: '[DexieNOC] Ręczny sabotaż aktywowany.' })
-      }).then(res => {
-        if (res.ok) alert('Wiadomość poszła.');
-        else alert('Błąd wysyłki.');
-      });
-    }
-
-    setInterval(() => {
-      const now = new Date();
-      document.getElementById('clock').innerText = now.toLocaleTimeString();
-    }, 1000);
-  </script>
 </body>
 </html>
