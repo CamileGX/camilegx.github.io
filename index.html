@@ -1,45 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>DexieNOC Neon Terminal</title>
-  <style>
-    body {
-      background-color: #0f0f1a;
-      color: #00ffcc;
-      font-family: monospace;
-      margin: 0;
-      padding: 2rem;
-    }
-    .terminal {
-      background-color: #111;
-      padding: 2rem;
-      border: 2px solid #00ffcc;
-      border-radius: 10px;
-      box-shadow: 0 0 20px #00ffcc;
-      animation: pulse 2s infinite;
-    }
-    h1 {
-      color: #ff00ff;
-      text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
-    }
-    .line {
-      margin-bottom: 1rem;
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 20px #00ffcc; }
-      50% { box-shadow: 0 0 40px #00ffcc; }
-      100% { box-shadow: 0 0 20px #00ffcc; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DexieNOC</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="terminal">
-    <h1>DexieNOC Uplink</h1>
-    <div class="line">> Operator: KC // Mode: Dexie 2.1</div>
-    <div class="line">> Protocol: Toast 2.1 Initialized</div>
-    <div class="line">> Observer: Humphrey ACTIVE // Shadowmode</div>
-    <div class="line">> Neon breach detected // Pulse engaged</div>
-  </div>
+    <div class="neon-box">
+        <h1>DexieNOC Uplink</h1>
+        <p>> Operator: KC // Mode: Dexie 2.1</p>
+        <p>> Protocol: Toast 2.1 Initialized</p>
+        <p>> Observer: Humphrey ACTIVE // Shadowmode</p>
+        <p>> Neon breach detected // Pulse engaged</p>
+    </div>
 </body>
 </html>
