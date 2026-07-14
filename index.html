@@ -1,140 +1,55 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DexieNOC</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      background-color: #0d0d0d;
-      color: #fff;
-      font-family: 'Courier New', monospace;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="CamileGX — thoughtful digital work, made with care.">
+    <title>CamileGX — Digital maker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main>
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="CamileGX home">CG<span>.</span></a>
+        <a class="nav-link" href="https://github.com/CamileGX" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
 
-    header {
-      padding: 2em 0 1em;
-    }
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="eyebrow"><span></span> Independent digital maker</p>
+        <h1 id="hero-title">Small details.<br><em>Big feeling.</em></h1>
+        <p class="intro">A quiet corner of the internet for considered ideas, useful experiments, and things made with curiosity.</p>
+        <a class="button" href="https://github.com/CamileGX" target="_blank" rel="noreferrer">Explore my work <span aria-hidden="true">→</span></a>
+      </section>
 
-    h1 {
-      font-size: 2.5em;
-      color: #ff00ff;
-      text-shadow: 0 0 10px #ff00ff;
-    }
+      <section class="principles" aria-label="What I value">
+        <p class="section-label">A few principles</p>
+        <div class="principle-grid">
+          <article>
+            <span class="number">01</span>
+            <h2>Make it clear</h2>
+            <p>Good design gives ideas room to breathe. Every element should earn its place.</p>
+          </article>
+          <article>
+            <span class="number">02</span>
+            <h2>Keep it human</h2>
+            <p>Technology is at its best when it feels natural, generous, and a little bit delightful.</p>
+          </article>
+          <article>
+            <span class="number">03</span>
+            <h2>Stay curious</h2>
+            <p>The most interesting work begins with a question and leaves room for the next one.</p>
+          </article>
+        </div>
+      </section>
+    </main>
 
-    .subtitle {
-      font-size: 1.1em;
-      color: #ccc;
-    }
-
-    .grid {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin: 3em 0 1em;
-      flex-wrap: wrap;
-    }
-
-    .tile {
-      background-color: #111;
-      padding: 1.5em 2em;
-      border: 2px solid #00ffff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #00ffff;
-      color: #00ffff;
-      text-decoration: none;
-      font-size: 1.3em;
-      transition: transform 0.2s;
-    }
-
-    .tile:hover {
-      transform: scale(1.05);
-      text-shadow: 0 0 5px #00ffff;
-    }
-
-    footer {
-      padding: 2em;
-      font-size: 0.9em;
-      color: #777;
-    }
-
-    #clock {
-      margin-top: 2em;
-      font-size: 1.2em;
-      color: #00ffff;
-      text-shadow: 0 0 5px #00ffff;
-    }
-
-    #pulseButton {
-      margin-top: 2em;
-      padding: 1em 2em;
-      font-size: 1em;
-      background: #9900ff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 0 15px #9900ff;
-      transition: transform 0.2s;
-    }
-
-    #pulseButton:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 25px #cc00ff;
-    }
-
-    #glitchMessage {
-      margin-top: 1.5em;
-      font-style: italic;
-      color: #00ffcc;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>DEXIENOC // SHADOW EDITION</h1>
-    <p class="subtitle">Offline mode activated</p>
-  </header>
-  <main>
-    <div class="grid">
-      <a href="intel.html" class="tile">Intel</a>
-      <a href="rytualy.html" class="tile">Rytuały</a>
-      <a href="projekty.html" class="tile">Projekty</a>
-    </div>
-
-    <button id="pulseButton" onclick="activatePulse()">Aktywuj puls</button>
-    <div id="glitchMessage"></div>
-    <div id="clock"></div>
-
-    <p style="margin-top: 2em;">No runtime. No backend. No problem.</p>
-  </main>
-  <footer>
-    <p>Dexie Core Synced Locally // Pendrive Ready</p>
-  </footer>
-
-  <script>
-    function updateClock() {
-      const now = new Date();
-      document.getElementById("clock").innerText = now.toLocaleTimeString();
-    }
-
-    function activatePulse() {
-      const messages = [
-        "Pulse injected // Neon ripple initialized.",
-        "Toast 2.1 acknowledged.",
-        "Reality checkpoint synced.",
-        "Humphrey confirmed // Still watching.",
-        "Offline defenses calibrated."
-      ];
-      const chosen = messages[Math.floor(Math.random() * messages.length)];
-      document.getElementById("glitchMessage").innerText = chosen;
-    }
-
-    setInterval(updateClock, 1000);
-    updateClock();
-  </script>
-</body>
+    <footer>
+      <p>© <span id="year"></span> CamileGX</p>
+      <p>Built simply, on GitHub Pages.</p>
+    </footer>
+    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  </body>
 </html>
