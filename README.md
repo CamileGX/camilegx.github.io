@@ -34,7 +34,7 @@ DexieOS deliberately uses no framework, build tooling, server, or database. It i
 
 Notes, shortcuts, project details, settings, timeline milestones, and integration identifiers are stored under the `dexieos:` namespace in the current browser's `localStorage`. No personal content is sent to a DexieOS server because there is no DexieOS server.
 
-The Files page intentionally does not simulate file management. In Chromium-based browsers served over HTTPS or localhost, choose `C:\Users\cisek\Documents\Dexi AGI` when prompted. The File System Access API grants access only after you explicitly select a folder, as required by browser security. The browser may retain that permission for the current origin, but DexieOS never receives unrestricted disk access.
+The Files page intentionally does not simulate file management. In Chromium-based browsers served over HTTPS or localhost, select the workspace folder you want to manage when prompted. The File System Access API grants access only after you explicitly select a folder, as required by browser security. The browser may retain that permission for the current origin, but DexieOS never receives unrestricted disk access.
 
 ### Integrations
 
@@ -44,7 +44,7 @@ The Files page intentionally does not simulate file management. In Chromium-base
 
 ## Local development
 
-Open `index.html` in a modern browser for interface review. To use Google sign-in or the Files page, serve the folder over `localhost` or deploy it to GitHub Pages (secure context required). There are no packages to install and no build step.
+Serve the project through a local HTTP server for development and interface review; do not open it with `file://`. This ensures ES modules, browser storage, and secure browser APIs resolve correctly. Google sign-in and the Files page additionally require `localhost` or GitHub Pages because they need a secure context. There are no packages to install and no build step.
 
 ## Roadmap
 
