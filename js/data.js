@@ -1,7 +1,7 @@
 export const projects = [
-  { name: "Atlas", type: "Spatial intelligence", description: "A visual system for turning complex research into clear, connected maps.", progress: 78, state: "Active" },
-  { name: "Luma", type: "Creative tools", description: "An experimental workspace for shaping concepts from a single luminous prompt.", progress: 52, state: "Building" },
-  { name: "Northstar", type: "Personal systems", description: "A calmer way to plan, reflect, and steer work that matters.", progress: 91, state: "Active" },
+  { name: "Atlas", type: "Spatial intelligence", description: "A visual system for turning complex research into clear, connected maps.", progress: 78, state: "Active", notes:"Synthesise user-research findings into the next mapping model.", links:["https://github.com/CamileGX"] },
+  { name: "Luma", type: "Creative tools", description: "An experimental workspace for shaping concepts from a single luminous prompt.", progress: 52, state: "Building", notes:"Exploring the first reusable creative canvas.", links:[] },
+  { name: "Northstar", type: "Personal systems", description: "A calmer way to plan, reflect, and steer work that matters.", progress: 91, state: "Active", notes:"Prepare the weekly reflection flow.", links:[] },
   { name: "Signal", type: "Knowledge systems", description: "A focused reader that finds the useful parts hiding in the noise.", progress: 34, state: "Exploring" },
   { name: "Nucleus", type: "AI interface", description: "A modular interface for working alongside specialized AI agents.", progress: 66, state: "Active" },
   { name: "Orbit", type: "Lab", description: "A collection of small, useful experiments for the open web.", progress: 20, state: "Prototype" }
