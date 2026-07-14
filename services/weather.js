@@ -1,11 +1,5 @@
-const weatherCodes = {0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Foggy",51:"Light drizzle",61:"Light rain",63:"Rain",71:"Snow",80:"Rain showers",95:"Thunderstorm"};
-export async function getWeather() {
-  if (!navigator.geolocation) throw new Error("Geolocation is not available in this browser.");
-  const position = await new Promise((resolve,reject) => navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:false,timeout:10000,maximumAge:600000}));
-  const { latitude, longitude } = position.coords;
-  const [weather, place] = await Promise.all([
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`).then(r=>r.json()),
-    fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&count=1`).then(r=>r.json())
-  ]);
-  return { city:place.results?.[0]?.name || "Your location", temperature:Math.round(weather.current.temperature_2m), condition:weatherCodes[weather.current.weather_code] || "Current conditions", timezone:weather.timezone };
-}
+const labels={0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Foggy",51:"Light drizzle",61:"Light rain",63:"Rain",71:"Snow",80:"Rain showers",95:"Thunderstorm"};
+const json=async url=>{const r=await fetch(url);if(!r.ok)throw new Error("Weather service is unavailable.");return r.json();};
+export const locationError=error=>({1:"Location permission was denied.",2:"Your location is unavailable.",3:"Location request timed out."}[error?.code]||"Location could not be detected.");
+export async function getWeatherForCoordinates(latitude,longitude){const data=await json(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`);if(!data.current)throw new Error("Weather data is unavailable.");return {temperature:Math.round(data.current.temperature_2m),condition:labels[data.current.weather_code]||"Unknown conditions",timezone:data.timezone};}
+export async function getWeatherForCity(city){const places=await json(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`),place=places.results?.[0];if(!place)throw new Error("City not found.");return {...await getWeatherForCoordinates(place.latitude,place.longitude),city:place.name};}

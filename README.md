@@ -12,7 +12,7 @@ DexieOS is a private, local-first personal operating system built as a static Gi
 - Local notes with autosave, folders, sorting, searching, rename, duplicate, and confirmed deletion
 - A locally persisted timeline with addable milestones
 - A real local file manager powered by the browser File System Access API: select a workspace, upload, drag-and-drop, rename, delete, search, filter, preview, and download/open files
-- Settings for light/dark/dim themes, accents, reduced motion, compact mode, Google OAuth setup, GitHub username, and local data reset
+- Settings for light/dark/dim themes, timezone fallback, and local data reset
 
 ## Architecture
 
@@ -40,7 +40,7 @@ The Files page intentionally does not simulate file management. In Chromium-base
 
 - **Weather**: requests browser geolocation only when you choose “Use my location,” then fetches current conditions and city name from Open-Meteo.
 - **GitHub**: accepts a username and uses GitHub’s public API for recently updated repositories. Authentication and private-repository support are deliberately not requested.
-- **Google**: Settings contains a Google Identity Services foundation. Add your own OAuth web client ID to initialize Google sign-in. Drive, Calendar, and Gmail sync are intentionally not enabled yet; the service boundary exists so they can be added without coupling them to the UI.
+- **Google account integration**: intentionally disabled until a real OAuth configuration is added. DexieOS does not ship a fake sign-in flow or placeholder credentials.
 
 ## Local development
 
