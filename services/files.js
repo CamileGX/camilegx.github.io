@@ -1,7 +1,0 @@
-let directoryHandle;
-export const fileApiSupported = () => "showDirectoryPicker" in window;
-export async function selectWorkspace() { directoryHandle = await window.showDirectoryPicker({ mode:"readwrite", startIn:"documents" }); return directoryHandle; }
-export async function listFiles() { if (!directoryHandle) return []; const files=[]; for await (const entry of directoryHandle.values()) files.push({name:entry.name,kind:entry.kind,handle:entry}); return files.sort((a,b)=>a.name.localeCompare(b.name)); }
-export async function uploadFiles(fileList) { if (!directoryHandle) throw new Error("Choose a workspace folder first."); for (const file of fileList) { const handle=await directoryHandle.getFileHandle(file.name,{create:true}); const writable=await handle.createWritable(); await writable.write(file); await writable.close(); } }
-export async function deleteFile(name) { if (!directoryHandle) throw new Error("No workspace selected."); await directoryHandle.removeEntry(name,{recursive:true}); }
-export async function renameFile(entry, name) { if (!directoryHandle) throw new Error("No workspace selected."); if(entry.kind!=="file") throw new Error("Folder rename is not available yet."); const file=await entry.handle.getFile(); const target=await directoryHandle.getFileHandle(name,{create:true}); const writable=await target.createWritable(); await writable.write(file); await writable.close(); if(name!==entry.name) await directoryHandle.removeEntry(entry.name); }

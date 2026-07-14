@@ -1,15 +1,651 @@
-import { views,icon,defaultTools } from "../components/views.js";import { read,write,reset } from "../storage/store.js";import { getWeatherForCoordinates,getWeatherForCity,locationError } from "../services/weather.js";
-const app=document.querySelector("#app"),side=document.querySelector("#sidebar"),modal=document.querySelector("#modal"),names={home:"Command Center",projects:"Projects",assistants:"AI Toolkit",knowledge:"Knowledge Base",timeline:"Timeline",notes:"Notes",files:"Files",settings:"Settings"};
-const defaults={links:["Google","YouTube","ChatGPT","GitHub","Discord","Steam","Xbox","Reddit","Gmail","Drive","Calendar","Replit"].map(title=>({id:crypto.randomUUID(),title,url:`https://${title==="ChatGPT"?"chatgpt.com":title==="Drive"?"drive.google.com":title==="Calendar"?"calendar.google.com":title.toLowerCase()+".com"}`,icon:"",category:"General"})),projects:[],tools:defaultTools,notes:[{id:"welcome",title:"Welcome",body:"This note is stored locally."}]};const get=(key)=>read(key,defaults[key]),set=(key,value)=>write(key,value),settings=()=>read("settings",{}),saveSettings=value=>write("settings",{...settings(),...value});const url=value=>{try{return ["http:","https:"].includes(new URL(value).protocol)}catch{return false}};
-function modalForm(title,fields,save){modal.innerHTML=`<button class=dialog-close>×</button><form class=modal-form><h2>${title}</h2>${fields.map(f=>`<label>${f.label}<input name=${f.name} value="${f.value||""}" ${f.required?"required":""}></label>`).join("")}<div class=modal-actions><button type=button class=text-button>Cancel</button><button class=primary-button>Save</button></div></form>`;modal.showModal();modal.querySelector(".dialog-close").onclick=modal.querySelector(".text-button").onclick=()=>modal.close();modal.querySelector("form").onsubmit=e=>{e.preventDefault();save(Object.fromEntries(new FormData(e.currentTarget)));modal.close();};}
-function clock(){const el=document.querySelector("#clock"),zone=settings().timezone||"Europe/London";if(el){el.firstChild.nodeValue=new Intl.DateTimeFormat(undefined,{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:zone}).format(new Date());el.querySelector("small").textContent=`LOCAL TIME · SOUTHAMPTON · ${zone}`;}}
-function renderLinks(){const grid=document.querySelector("#shortcutGrid");if(!grid)return;const links=get("links");grid.innerHTML=links.map((x,i)=>`<article class=shortcut><a href="${x.url}" target=_blank rel=noreferrer><span>${x.icon||icon(x.title)}</span><b>${x.title}</b></a><button data-link="${i}">•••</button></article>`).join("")||"<p class=empty-files>Add a quick link to begin.</p>";grid.onclick=e=>{const b=e.target.closest("[data-link]");if(b)editLink(+b.dataset.link);};}
-function editLink(index){const all=get("links"),current=all[index]||{};modalForm(index===undefined?"Add link":"Edit link",[{label:"Title",name:"title",value:current.title,required:true},{label:"URL",name:"url",value:current.url,required:true},{label:"Icon or emoji",name:"icon",value:current.icon},{label:"Category",name:"category",value:current.category}],data=>{if(!url(data.url)){alert("Enter a valid http or https URL.");return;}if(index===undefined)all.push({id:crypto.randomUUID(),...data});else all[index]={...all[index],...data};set("links",all);renderLinks();});if(index!==undefined){const actions=modal.querySelector(".modal-actions");actions.insertAdjacentHTML("afterbegin",`<button type=button class="text-button danger" id=removeItem>Delete</button><button type=button class=text-button id=moveItem>Move earlier</button>`);modal.querySelector("#removeItem").onclick=()=>{all.splice(index,1);set("links",all);modal.close();renderLinks();};modal.querySelector("#moveItem").onclick=()=>{if(index>0){[all[index-1],all[index]]=[all[index],all[index-1]];set("links",all);modal.close();renderLinks();}};}}
-function renderProjects(){const all=get("projects"),grid=document.querySelector("#projectGrid"),home=document.querySelector("#homeProjects"),html=all.map((p,i)=>`<button class="project-card project-open" data-project=${i}><span class=project-type>${p.category||"General"}</span><h2>${p.name}</h2><p>${p.description||"No description"}</p><div class=project-footer><span>${p.status||"Planned"}</span></div></button>`).join("");if(grid)grid.innerHTML=html||empty("No projects yet","add-project","Add your first project");if(home)home.innerHTML=all.slice(0,3).map((p,i)=>`<button class="project-row project-open" data-project=${i}><strong>${p.name}</strong><small>${p.status||"Planned"}</small></button>`).join("")||"<p class=empty-files>Add your first project to see it here.</p>";document.querySelectorAll(".project-open").forEach(b=>b.onclick=()=>editProject(+b.dataset.project));}
-function editProject(index){const all=get("projects"),p=all[index]||{};modalForm(index===undefined?"New project":"Edit project",[{label:"Name",name:"name",value:p.name,required:true},{label:"Description",name:"description",value:p.description},{label:"Status",name:"status",value:p.status||"Planned"},{label:"URL",name:"url",value:p.url},{label:"Category",name:"category",value:p.category}],data=>{if(data.url&&!url(data.url)){alert("Enter a valid http or https URL.");return;}if(index===undefined)all.push({id:crypto.randomUUID(),...data});else all[index]={...all[index],...data};set("projects",all);renderProjects();});if(index!==undefined){modal.querySelector(".modal-actions").insertAdjacentHTML("afterbegin",`<button type=button class="text-button danger" id=removeItem>Delete</button>`);modal.querySelector("#removeItem").onclick=()=>{all.splice(index,1);set("projects",all);modal.close();renderProjects();};}}
-function renderTools(){const grid=document.querySelector("#toolGrid");if(!grid)return;const all=get("tools");grid.innerHTML=all.map((t,i)=>`<article class=assistant-card><div class=assistant-icon>${icon(t.name)}</div><h2>${t.name}</h2><p>${t.description||"No description"}</p><div class=assistant-activity>${t.notes||"No notes"}</div><a href="${t.url}" target=_blank rel=noreferrer>Open ↗</a><button data-tool=${i}>Edit</button></article>`).join("");grid.onclick=e=>{const b=e.target.closest("[data-tool]");if(b)editTool(+b.dataset.tool);};}
-function editTool(index){const all=get("tools"),t=all[index]||{};modalForm(index===undefined?"Add tool":"Edit tool",[{label:"Name",name:"name",value:t.name,required:true},{label:"Description",name:"description",value:t.description},{label:"URL",name:"url",value:t.url,required:true},{label:"Notes",name:"notes",value:t.notes}],data=>{if(!url(data.url)){alert("Enter a valid http or https URL.");return;}if(index===undefined)all.push({id:crypto.randomUUID(),...data});else all[index]={...all[index],...data};set("tools",all);renderTools();});if(index!==undefined){modal.querySelector(".modal-actions").insertAdjacentHTML("afterbegin",`<button type=button class="text-button danger" id=removeItem>Delete</button>`);modal.querySelector("#removeItem").onclick=()=>{all.splice(index,1);set("tools",all);modal.close();renderTools();};}}
-async function weather(mode){const card=document.querySelector("#weatherCard");const show=async city=>{try{const x=await getWeatherForCity(city);card.innerHTML=`<span class=weather-icon>☀</span><span><b>${x.temperature}° · ${x.city}</b><small>${x.condition} · ${x.timezone}</small></span>`;}catch(e){card.innerHTML=`<span class=weather-icon>!</span><span><b>Weather unavailable</b><small>${e.message}</small></span>`;}};if(mode==="saved"){show(read("weatherCity","Southampton"));return;}if(mode==="city"){modalForm("Configure weather",[{label:"City",name:"city",value:read("weatherCity","Southampton"),required:true}],async d=>{set("weatherCity",d.city);card.innerHTML="<span class=weather-icon>◌</span><span><b>Loading weather…</b><small>Looking up your city.</small></span>";show(d.city);});return;}card.innerHTML="<span class=weather-icon>◌</span><span><b>Requesting location…</b><small>Waiting for browser permission.</small></span>";if(!navigator.geolocation){card.innerHTML="<span class=weather-icon>!</span><span><b>Weather unavailable</b><small>Geolocation is not supported by this browser.</small></span>";return;}navigator.geolocation.getCurrentPosition(async p=>{try{const x=await getWeatherForCoordinates(p.coords.latitude,p.coords.longitude);card.innerHTML=`<span class=weather-icon>☀</span><span><b>${x.temperature}°</b><small>${x.condition} · ${x.timezone}</small></span>`;}catch(e){card.innerHTML=`<span class=weather-icon>!</span><span><b>Weather unavailable</b><small>${e.message}</small></span>`;}},e=>card.innerHTML=`<span class=weather-icon>!</span><span><b>Weather unavailable</b><small>${locationError(e)}</small></span>`,{timeout:10000,maximumAge:600000});}
-function bind(page){if(page==="home"){clock();renderLinks();renderProjects();weather("saved");document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>location.hash=b.dataset.go);document.querySelectorAll("[data-action]").forEach(b=>b.onclick=()=>{if(b.dataset.action==="add-link")editLink();if(b.dataset.action==="add-project")editProject();if(b.dataset.action==="enable-weather")weather();if(b.dataset.action==="weather-city")weather("city");});}if(page==="projects"){renderProjects();document.querySelector("[data-action=add-project]").onclick=()=>editProject();}if(page==="assistants"){renderTools();document.querySelector("[data-action=add-tool]").onclick=()=>editTool();}if(page==="notes"){const notes=get("notes"),list=document.querySelector("#noteList"),title=document.querySelector("#noteTitle"),body=document.querySelector("#noteBody");let active=notes[0];const paint=()=>{list.innerHTML=notes.map(n=>`<button data-note=${n.id}><b>${n.title}</b></button>`).join("");title.value=active.title;body.value=active.body;};paint();list.onclick=e=>{const id=e.target.closest("button")?.dataset.note;active=notes.find(n=>n.id===id)||active;paint();};const saveNote=()=>{active.title=title.value;active.body=body.value;set("notes",notes);};title.oninput=body.oninput=saveNote;document.querySelector("#newNote").onclick=()=>{active={id:crypto.randomUUID(),title:"Untitled note",body:""};notes.unshift(active);set("notes",notes);paint();};}if(page==="settings"){const s=settings(),d=document.querySelector("#displayMode");d.value=s.mode||"dark";d.onchange=()=>saveSettings({mode:d.value});const tz=document.querySelector("#timezoneSelect"),auto=Intl.DateTimeFormat().resolvedOptions().timeZone,zones=Intl.supportedValuesOf?.("timeZone")||[auto,"UTC"];tz.innerHTML=`<option value="">Automatic (${auto})</option>${zones.map(z=>`<option ${s.timezone===z?"selected":""}>${z}</option>`).join("")}`;tz.onchange=()=>saveSettings({timezone:tz.value});document.querySelector("#resetSettings").onclick=()=>{if(confirm("Clear local DexieOS data?")){reset();location.reload();}};}}
-function route(){const page=(location.hash||"#home").slice(1);app.innerHTML=(views[page]||views.home)();document.querySelector("#sectionName").textContent=names[page]||names.home;document.querySelectorAll("[data-page]").forEach(a=>a.classList.toggle("active",a.dataset.page===page));side.classList.remove("open");bind(page);}
-document.querySelector("#menuButton").onclick=()=>side.classList.toggle("open");window.addEventListener("hashchange",route);route();
+const STORAGE_KEY = "dexieos-data-v1";
+const WEATHER_CACHE_KEY = "dexieos-weather-cache-v1";
+
+const initialData = {
+  projects: [
+    {
+      id: crypto.randomUUID(),
+      name: "DexieOS",
+      description: "Osobiste centrum projektów, notatek i codziennych informacji.",
+      status: "active",
+      priority: "high",
+      progress: 45,
+      link: "https://github.com/CamileGX/camilegx.github.io",
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      name: "Genealogy",
+      description: "Porządkowanie rodzinnych nazwisk, miejscowości, map i dopasowań DNA.",
+      status: "active",
+      priority: "medium",
+      progress: 35,
+      link: "",
+      updatedAt: new Date(Date.now() - 86400000).toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      name: "Job Search",
+      description: "CV, aplikacje i organizacja powrotu do pracy.",
+      status: "active",
+      priority: "high",
+      progress: 30,
+      link: "",
+      updatedAt: new Date(Date.now() - 2 * 86400000).toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      name: "Gaming",
+      description: "Lista gier, serwerów i pomysłów związanych z ARK oraz innymi tytułami.",
+      status: "planned",
+      priority: "low",
+      progress: 10,
+      link: "",
+      updatedAt: new Date(Date.now() - 3 * 86400000).toISOString()
+    }
+  ],
+  notes: [
+    {
+      id: crypto.randomUUID(),
+      title: "DexieOS — kierunek",
+      category: "Projekty",
+      content: "Strona ma być praktyczna: projekty, notatki, pogoda Southampton, timeline i eksport danych.",
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      title: "Pomysły do rozbudowy",
+      category: "Pomysły",
+      content: "Później można dodać synchronizację, skróty do usług, RSS albo panel GitHub.",
+      updatedAt: new Date(Date.now() - 3600000).toISOString()
+    }
+  ],
+  timeline: [
+    {
+      id: crypto.randomUUID(),
+      title: "Start DexieOS",
+      date: new Date().toISOString().slice(0, 10),
+      content: "Pierwsza działająca wersja osobistego centrum dowodzenia.",
+      tags: "DexieOS, GitHub"
+    }
+  ],
+  knowledge: [
+    {
+      id: crypto.randomUUID(),
+      title: "GitHub Pages",
+      date: "",
+      content: "Statyczne strony działają bez backendu. Najbezpieczniejsze są ścieżki względne zaczynające się od ./",
+      tags: "GitHub, Web"
+    },
+    {
+      id: crypto.randomUUID(),
+      title: "LocalStorage",
+      date: "",
+      content: "Dane są przechowywane lokalnie w przeglądarce. Eksport JSON chroni przed utratą wpisów.",
+      tags: "JavaScript, Dane"
+    }
+  ],
+  changelog: [
+    {
+      id: crypto.randomUUID(),
+      title: "DexieOS v1.0",
+      date: new Date().toISOString().slice(0, 10),
+      content: "Dashboard, pogoda Southampton, projekty, notatki, timeline, baza wiedzy, ustawienia i import/eksport.",
+      tags: "Release"
+    }
+  ],
+  settings: {
+    theme: "dark",
+    accent: "#7c8cff",
+    animations: true
+  }
+};
+
+let state = loadState();
+let activeNoteId = state.notes[0]?.id || null;
+
+const qs = (selector, parent = document) => parent.querySelector(selector);
+const qsa = (selector, parent = document) => [...parent.querySelectorAll(selector)];
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return saved && saved.projects && saved.notes ? saved : structuredClone(initialData);
+  } catch {
+    return structuredClone(initialData);
+  }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function formatDate(value, options = {}) {
+  if (!value) return "Brak daty";
+  return new Intl.DateTimeFormat("pl-PL", {
+    timeZone: "Europe/London",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    ...options
+  }).format(new Date(value));
+}
+
+function relativeDate(value) {
+  const diff = Date.now() - new Date(value).getTime();
+  if (diff < 60000) return "przed chwilą";
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} min temu`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} godz. temu`;
+  return `${Math.floor(diff / 86400000)} dni temu`;
+}
+
+function escapeHtml(value = "") {
+  return value.replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[char]));
+}
+
+function showToast(message) {
+  const toast = qs("#toast");
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.add("hidden"), 2600);
+}
+
+function openView(name) {
+  qsa(".view").forEach(view => view.classList.toggle("active", view.id === `view-${name}`));
+  qsa(".nav-item").forEach(item => item.classList.toggle("active", item.dataset.view === name));
+  qs("#sidebar").classList.remove("open");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function setClock() {
+  const now = new Date();
+  qs("#currentTime").textContent = new Intl.DateTimeFormat("pl-PL", {
+    timeZone: "Europe/London",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).format(now);
+  qs("#currentDate").textContent = new Intl.DateTimeFormat("pl-PL", {
+    timeZone: "Europe/London",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  }).format(now);
+}
+
+const weatherCode = {
+  0: ["Bezchmurnie", "☀"],
+  1: ["Przeważnie pogodnie", "◐"],
+  2: ["Częściowe zachmurzenie", "☁"],
+  3: ["Pochmurno", "☁"],
+  45: ["Mgła", "≋"],
+  48: ["Mgła osadzająca szadź", "≋"],
+  51: ["Lekka mżawka", "☂"],
+  53: ["Mżawka", "☂"],
+  55: ["Silna mżawka", "☂"],
+  61: ["Lekki deszcz", "☂"],
+  63: ["Deszcz", "☂"],
+  65: ["Silny deszcz", "☂"],
+  71: ["Lekki śnieg", "❄"],
+  73: ["Śnieg", "❄"],
+  75: ["Silny śnieg", "❄"],
+  80: ["Przelotne opady", "☂"],
+  81: ["Przelotne opady", "☂"],
+  82: ["Silne opady", "☂"],
+  95: ["Burza", "ϟ"],
+  96: ["Burza z gradem", "ϟ"],
+  99: ["Silna burza z gradem", "ϟ"]
+};
+
+async function loadWeather(force = false) {
+  const container = qs("#weatherContent");
+  const cached = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || "null");
+  if (!force && cached && Date.now() - cached.savedAt < 20 * 60 * 1000) {
+    renderWeather(cached.data, true);
+    return;
+  }
+
+  container.innerHTML = `<div class="weather-main"><span class="weather-icon">◌</span><strong>Ładowanie…</strong></div>`;
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=50.9039&longitude=-1.4043&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=sunrise,sunset&timezone=Europe%2FLondon&forecast_days=1";
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Weather request failed");
+    const data = await response.json();
+    localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
+    renderWeather(data, false);
+  } catch {
+    if (cached) {
+      renderWeather(cached.data, true);
+      showToast("Pokazuję ostatnią zapisaną pogodę.");
+    } else {
+      container.innerHTML = `
+        <div class="weather-main"><span class="weather-icon">!</span><strong>Pogoda niedostępna</strong></div>
+        <p style="color:var(--muted);margin-top:12px">Sprawdź połączenie z internetem i odśwież.</p>`;
+    }
+  }
+}
+
+function renderWeather(data, cached) {
+  const current = data.current;
+  const daily = data.daily;
+  const [label, icon] = weatherCode[current.weather_code] || ["Warunki pogodowe", "◌"];
+  const timeOnly = value => new Intl.DateTimeFormat("pl-PL", {
+    timeZone: "Europe/London", hour: "2-digit", minute: "2-digit"
+  }).format(new Date(value));
+
+  qs("#weatherContent").innerHTML = `
+    <div class="weather-main">
+      <span class="weather-icon">${icon}</span>
+      <div><strong>${Math.round(current.temperature_2m)}°C</strong><span style="display:block;color:var(--muted)">${label}${cached ? " · zapisane" : ""}</span></div>
+    </div>
+    <div class="weather-details">
+      <div class="weather-detail"><span>Odczuwalna</span><strong>${Math.round(current.apparent_temperature)}°C</strong></div>
+      <div class="weather-detail"><span>Wilgotność</span><strong>${current.relative_humidity_2m}%</strong></div>
+      <div class="weather-detail"><span>Wiatr</span><strong>${Math.round(current.wind_speed_10m)} km/h</strong></div>
+      <div class="weather-detail"><span>Wschód</span><strong>${timeOnly(daily.sunrise[0])}</strong></div>
+      <div class="weather-detail"><span>Zachód</span><strong>${timeOnly(daily.sunset[0])}</strong></div>
+      <div class="weather-detail"><span>Lokalizacja</span><strong>Southampton</strong></div>
+    </div>`;
+}
+
+const statusLabels = {
+  active: "Aktywny", planned: "Planowany", paused: "Wstrzymany", done: "Zakończony"
+};
+const priorityLabels = { high: "Wysoki", medium: "Średni", low: "Niski" };
+
+function projectCard(project, compact = false) {
+  return `
+    <article class="project-card" data-project-id="${project.id}">
+      <div class="project-card-top">
+        <span class="badge">${statusLabels[project.status]}</span>
+        ${compact ? "" : `<div class="project-menu">
+          <button data-edit-project="${project.id}" title="Edytuj">✎</button>
+          <button data-delete-project="${project.id}" title="Usuń">×</button>
+        </div>`}
+      </div>
+      <h3>${escapeHtml(project.name)}</h3>
+      <p>${escapeHtml(project.description)}</p>
+      <div class="progress-bar"><div class="progress-fill" style="width:${project.progress}%"></div></div>
+      <div class="project-meta">
+        <span>${project.progress}%</span>
+        <span>${compact ? relativeDate(project.updatedAt) : `Priorytet: ${priorityLabels[project.priority]}`}</span>
+      </div>
+    </article>`;
+}
+
+function renderProjects() {
+  const filter = qs("#projectStatusFilter").value;
+  const projects = [...state.projects]
+    .filter(p => filter === "all" || p.status === filter)
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  qs("#projectsGrid").innerHTML = projects.length
+    ? projects.map(p => projectCard(p)).join("")
+    : `<div class="empty-state"><div><h2>Brak projektów</h2><p>Dodaj pierwszy projekt.</p></div></div>`;
+
+  const dashboard = [...state.projects]
+    .filter(p => p.status === "active")
+    .sort((a, b) => b.progress - a.progress)
+    .slice(0, 4);
+  qs("#dashboardProjects").innerHTML = dashboard.map(p => projectCard(p, true)).join("");
+
+  const focus = dashboard[0] || state.projects[0];
+  qs("#focusCard").innerHTML = focus ? `
+    <div><span class="badge">${statusLabels[focus.status]}</span><h3>${escapeHtml(focus.name)}</h3><p style="color:var(--muted)">${escapeHtml(focus.description)}</p></div>
+    <div><div style="display:flex;justify-content:space-between"><span>Postęp</span><strong>${focus.progress}%</strong></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${focus.progress}%"></div></div></div>`
+    : `<p style="color:var(--muted)">Brak projektów.</p>`;
+}
+
+function openProjectDialog(project = null) {
+  const dialog = qs("#projectDialog");
+  qs("#projectDialogTitle").textContent = project ? "Edytuj projekt" : "Nowy projekt";
+  qs("#projectId").value = project?.id || "";
+  qs("#projectName").value = project?.name || "";
+  qs("#projectDescription").value = project?.description || "";
+  qs("#projectStatus").value = project?.status || "active";
+  qs("#projectPriority").value = project?.priority || "medium";
+  qs("#projectProgress").value = project?.progress ?? 0;
+  qs("#projectProgressValue").textContent = `${project?.progress ?? 0}%`;
+  qs("#projectLink").value = project?.link || "";
+  dialog.showModal();
+}
+
+function renderNotes() {
+  const query = qs("#notesSearch").value.toLowerCase();
+  const category = qs("#notesCategoryFilter").value;
+  const categories = [...new Set(state.notes.map(n => n.category).filter(Boolean))].sort();
+
+  const filterSelect = qs("#notesCategoryFilter");
+  const selected = filterSelect.value;
+  filterSelect.innerHTML = `<option value="all">Wszystkie kategorie</option>` +
+    categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+  filterSelect.value = categories.includes(selected) ? selected : "all";
+
+  const notes = [...state.notes]
+    .filter(n => (!query || `${n.title} ${n.content} ${n.category}`.toLowerCase().includes(query)))
+    .filter(n => filterSelect.value === "all" || n.category === filterSelect.value)
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+  qs("#notesList").innerHTML = notes.length
+    ? notes.map(note => `
+      <div class="note-list-item ${note.id === activeNoteId ? "active" : ""}" data-note-id="${note.id}">
+        <strong>${escapeHtml(note.title || "Bez tytułu")}</strong>
+        <span>${escapeHtml(note.category || "Bez kategorii")} · ${relativeDate(note.updatedAt)}</span>
+      </div>`).join("")
+    : `<p style="color:var(--muted);padding:12px">Brak notatek.</p>`;
+
+  const recent = [...state.notes].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 4);
+  qs("#recentNotes").innerHTML = recent.map(note => `
+    <div class="stack-item" data-open-note="${note.id}">
+      <strong>${escapeHtml(note.title || "Bez tytułu")}</strong>
+      <span>${escapeHtml(note.category || "Bez kategorii")} · ${relativeDate(note.updatedAt)}</span>
+    </div>`).join("");
+
+  loadActiveNote();
+}
+
+function loadActiveNote() {
+  const note = state.notes.find(n => n.id === activeNoteId);
+  qs("#emptyNoteState").classList.toggle("hidden", Boolean(note));
+  qs("#noteEditor").classList.toggle("hidden", !note);
+  if (!note) return;
+  qs("#noteTitle").value = note.title;
+  qs("#noteCategory").value = note.category;
+  qs("#noteContent").value = note.content;
+  qs("#noteSavedStatus").textContent = "Zapisano";
+}
+
+function createNote() {
+  const note = {
+    id: crypto.randomUUID(),
+    title: "Nowa notatka",
+    category: "Ogólne",
+    content: "",
+    updatedAt: new Date().toISOString()
+  };
+  state.notes.unshift(note);
+  activeNoteId = note.id;
+  saveState();
+  renderNotes();
+  openView("notes");
+  setTimeout(() => qs("#noteTitle").select(), 0);
+}
+
+function saveActiveNote() {
+  const note = state.notes.find(n => n.id === activeNoteId);
+  if (!note) return;
+  note.title = qs("#noteTitle").value;
+  note.category = qs("#noteCategory").value;
+  note.content = qs("#noteContent").value;
+  note.updatedAt = new Date().toISOString();
+  qs("#noteSavedStatus").textContent = "Zapisywanie…";
+  clearTimeout(saveActiveNote.timer);
+  saveActiveNote.timer = setTimeout(() => {
+    saveState();
+    qs("#noteSavedStatus").textContent = "Zapisano";
+    renderNotes();
+  }, 450);
+}
+
+function renderSimpleEntries(type) {
+  const config = {
+    timeline: ["#timelineList", entry => `
+      <article class="timeline-item">
+        <time>${formatDate(entry.date)}</time>
+        <h3>${escapeHtml(entry.title)}</h3>
+        <p>${escapeHtml(entry.content)}</p>
+        <div class="tags">${tagsHtml(entry.tags)}</div>
+      </article>`],
+    knowledge: ["#knowledgeGrid", entry => `
+      <article class="knowledge-card">
+        <span class="badge">${escapeHtml(entry.tags?.split(",")[0]?.trim() || "Wiedza")}</span>
+        <h3>${escapeHtml(entry.title)}</h3>
+        <p>${escapeHtml(entry.content)}</p>
+        <div class="tags">${tagsHtml(entry.tags)}</div>
+      </article>`],
+    changelog: ["#changelogList", entry => `
+      <article class="changelog-item">
+        <time>${formatDate(entry.date)}</time>
+        <div><h3>${escapeHtml(entry.title)}</h3><p>${escapeHtml(entry.content)}</p><div class="tags">${tagsHtml(entry.tags)}</div></div>
+      </article>`]
+  };
+  const [selector, template] = config[type];
+  const list = [...state[type]].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+  qs(selector).innerHTML = list.map(template).join("") || `<div class="empty-state"><div><h2>Brak wpisów</h2></div></div>`;
+}
+
+function tagsHtml(tags = "") {
+  return tags.split(",").map(t => t.trim()).filter(Boolean).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+}
+
+function openSimpleEntryDialog(type) {
+  const labels = {
+    timeline: ["Timeline", "Dodaj wydarzenie"],
+    knowledge: ["Baza wiedzy", "Dodaj wpis"],
+    changelog: ["Changelog", "Dodaj zmianę"]
+  };
+  qs("#simpleEntryType").value = type;
+  qs("#simpleEntryKicker").textContent = labels[type][0];
+  qs("#simpleEntryTitle").textContent = labels[type][1];
+  qs("#simpleEntryName").value = "";
+  qs("#simpleEntryDate").value = new Date().toISOString().slice(0, 10);
+  qs("#simpleEntryContent").value = "";
+  qs("#simpleEntryTags").value = "";
+  qs("#simpleEntryDialog").showModal();
+}
+
+function renderAll() {
+  renderProjects();
+  renderNotes();
+  renderSimpleEntries("timeline");
+  renderSimpleEntries("knowledge");
+  renderSimpleEntries("changelog");
+  applySettings();
+}
+
+function applySettings() {
+  document.documentElement.dataset.theme = state.settings.theme;
+  document.documentElement.style.setProperty("--accent", state.settings.accent);
+  document.body.classList.toggle("no-animations", !state.settings.animations);
+  qs("#themeSelect").value = state.settings.theme;
+  qs("#accentColor").value = state.settings.accent;
+  qs("#animationsToggle").checked = state.settings.animations;
+}
+
+function globalSearch(query) {
+  const needle = query.trim().toLowerCase();
+  const box = qs("#searchResults");
+  if (needle.length < 2) {
+    box.classList.add("hidden");
+    box.innerHTML = "";
+    return;
+  }
+
+  const results = [
+    ...state.projects.map(x => ({ type: "projects", id: x.id, title: x.name, meta: "Projekt", text: x.description })),
+    ...state.notes.map(x => ({ type: "notes", id: x.id, title: x.title, meta: `Notatka · ${x.category}`, text: x.content })),
+    ...state.timeline.map(x => ({ type: "timeline", id: x.id, title: x.title, meta: "Timeline", text: x.content })),
+    ...state.knowledge.map(x => ({ type: "knowledge", id: x.id, title: x.title, meta: "Wiedza", text: x.content }))
+  ].filter(x => `${x.title} ${x.meta} ${x.text}`.toLowerCase().includes(needle)).slice(0, 10);
+
+  box.innerHTML = results.length
+    ? results.map(x => `<button class="search-result" data-search-type="${x.type}" data-search-id="${x.id}">
+        ${escapeHtml(x.title)}<span>${escapeHtml(x.meta)}</span>
+      </button>`).join("")
+    : `<div style="padding:14px;color:var(--muted)">Brak wyników.</div>`;
+  box.classList.remove("hidden");
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `dexieos-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importData(file) {
+  try {
+    const imported = JSON.parse(await file.text());
+    if (!imported.projects || !imported.notes || !imported.settings) throw new Error("Invalid data");
+    state = imported;
+    activeNoteId = state.notes[0]?.id || null;
+    saveState();
+    renderAll();
+    showToast("Dane zostały zaimportowane.");
+  } catch {
+    showToast("Nie udało się zaimportować pliku.");
+  }
+}
+
+qsa(".nav-item").forEach(btn => btn.addEventListener("click", () => openView(btn.dataset.view)));
+qsa("[data-open-view]").forEach(btn => btn.addEventListener("click", () => openView(btn.dataset.openView)));
+qsa("[data-close-dialog]").forEach(btn => btn.addEventListener("click", () => qs(`#${btn.dataset.closeDialog}`).close()));
+
+qs("#menuBtn").addEventListener("click", () => qs("#sidebar").classList.toggle("open"));
+qs("#refreshWeatherBtn").addEventListener("click", () => loadWeather(true));
+
+["#quickProjectBtn", "#addProjectBtn"].forEach(selector => qs(selector).addEventListener("click", () => openProjectDialog()));
+["#quickNoteBtn", "#addNoteBtn"].forEach(selector => qs(selector).addEventListener("click", createNote));
+
+qsa("[data-action='new-project']").forEach(btn => btn.addEventListener("click", () => openProjectDialog()));
+qsa("[data-action='new-note']").forEach(btn => btn.addEventListener("click", createNote));
+
+qs("#projectProgress").addEventListener("input", event => {
+  qs("#projectProgressValue").textContent = `${event.target.value}%`;
+});
+
+qs("#projectForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const id = qs("#projectId").value;
+  const existing = state.projects.find(p => p.id === id);
+  const project = {
+    id: existing?.id || crypto.randomUUID(),
+    name: qs("#projectName").value.trim(),
+    description: qs("#projectDescription").value.trim(),
+    status: qs("#projectStatus").value,
+    priority: qs("#projectPriority").value,
+    progress: Number(qs("#projectProgress").value),
+    link: qs("#projectLink").value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+  if (existing) Object.assign(existing, project);
+  else state.projects.unshift(project);
+  saveState();
+  renderProjects();
+  qs("#projectDialog").close();
+  showToast(existing ? "Projekt zaktualizowany." : "Projekt dodany.");
+});
+
+qs("#projectsGrid").addEventListener("click", event => {
+  const editId = event.target.dataset.editProject;
+  const deleteId = event.target.dataset.deleteProject;
+  if (editId) openProjectDialog(state.projects.find(p => p.id === editId));
+  if (deleteId && confirm("Usunąć ten projekt?")) {
+    state.projects = state.projects.filter(p => p.id !== deleteId);
+    saveState();
+    renderProjects();
+    showToast("Projekt usunięty.");
+  }
+});
+
+qs("#projectStatusFilter").addEventListener("change", renderProjects);
+
+qs("#notesList").addEventListener("click", event => {
+  const item = event.target.closest("[data-note-id]");
+  if (!item) return;
+  activeNoteId = item.dataset.noteId;
+  renderNotes();
+});
+qs("#recentNotes").addEventListener("click", event => {
+  const item = event.target.closest("[data-open-note]");
+  if (!item) return;
+  activeNoteId = item.dataset.openNote;
+  openView("notes");
+  renderNotes();
+});
+["#noteTitle", "#noteCategory", "#noteContent"].forEach(selector => qs(selector).addEventListener("input", saveActiveNote));
+qs("#notesSearch").addEventListener("input", renderNotes);
+qs("#notesCategoryFilter").addEventListener("change", renderNotes);
+
+qs("#deleteNoteBtn").addEventListener("click", () => {
+  if (!activeNoteId || !confirm("Usunąć tę notatkę?")) return;
+  state.notes = state.notes.filter(n => n.id !== activeNoteId);
+  activeNoteId = state.notes[0]?.id || null;
+  saveState();
+  renderNotes();
+  showToast("Notatka usunięta.");
+});
+
+qs("#addTimelineBtn").addEventListener("click", () => openSimpleEntryDialog("timeline"));
+qs("#addKnowledgeBtn").addEventListener("click", () => openSimpleEntryDialog("knowledge"));
+qs("#addChangelogBtn").addEventListener("click", () => openSimpleEntryDialog("changelog"));
+
+qs("#simpleEntryForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const type = qs("#simpleEntryType").value;
+  state[type].unshift({
+    id: crypto.randomUUID(),
+    title: qs("#simpleEntryName").value.trim(),
+    date: qs("#simpleEntryDate").value,
+    content: qs("#simpleEntryContent").value.trim(),
+    tags: qs("#simpleEntryTags").value.trim()
+  });
+  saveState();
+  renderSimpleEntries(type);
+  qs("#simpleEntryDialog").close();
+  showToast("Wpis dodany.");
+});
+
+qs("#themeSelect").addEventListener("change", event => {
+  state.settings.theme = event.target.value;
+  saveState(); applySettings();
+});
+qs("#accentColor").addEventListener("input", event => {
+  state.settings.accent = event.target.value;
+  saveState(); applySettings();
+});
+qs("#animationsToggle").addEventListener("change", event => {
+  state.settings.animations = event.target.checked;
+  saveState(); applySettings();
+});
+qs("#resetDataBtn").addEventListener("click", () => {
+  if (!confirm("Przywrócić dane startowe? Obecne wpisy zostaną usunięte.")) return;
+  state = structuredClone(initialData);
+  activeNoteId = state.notes[0]?.id || null;
+  saveState(); renderAll();
+  showToast("Przywrócono dane startowe.");
+});
+
+qs("#globalSearch").addEventListener("input", event => globalSearch(event.target.value));
+qs("#searchResults").addEventListener("click", event => {
+  const item = event.target.closest("[data-search-type]");
+  if (!item) return;
+  const type = item.dataset.searchType;
+  if (type === "notes") activeNoteId = item.dataset.searchId;
+  openView(type);
+  if (type === "notes") renderNotes();
+  qs("#searchResults").classList.add("hidden");
+  qs("#globalSearch").value = "";
+});
+document.addEventListener("click", event => {
+  if (!event.target.closest(".search-wrap")) qs("#searchResults").classList.add("hidden");
+});
+
+qs("#exportDataBtn").addEventListener("click", exportData);
+qs("#importDataInput").addEventListener("change", event => {
+  const file = event.target.files[0];
+  if (file) importData(file);
+  event.target.value = "";
+});
+
+setClock();
+setInterval(setClock, 1000);
+renderAll();
+loadWeather();

@@ -1,41 +1,331 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="DexieOS — a personal AI command center.">
-    <meta name="theme-color" content="#080b14">
-    <title>DexieOS — Personal AI Command Center</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/components.css">
-  </head>
-  <body>
-    <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
-    <div class="app-shell">
-      <aside class="sidebar" id="sidebar">
-        <a class="wordmark" href="#home" aria-label="DexieOS home"><span class="wordmark-mark">D</span><span>Dexie<span class="accent">OS</span></span></a>
-        <nav class="side-nav" aria-label="Primary navigation">
-          <a href="#home" data-page="home"><span class="nav-icon">⌂</span>Home</a>
-          <a href="#projects" data-page="projects"><span class="nav-icon">◈</span>Projects</a>
-          <a href="#assistants" data-page="assistants"><span class="nav-icon">✦</span>AI Assistants</a>
-          <a href="#knowledge" data-page="knowledge"><span class="nav-icon">◫</span>Knowledge Base</a>
-          <a href="#timeline" data-page="timeline"><span class="nav-icon">◌</span>Timeline</a>
-          <a href="#notes" data-page="notes"><span class="nav-icon">▤</span>Notes</a>
-          <a href="#files" data-page="files"><span class="nav-icon">▱</span>Files</a>
-        </nav>
-        <div class="sidebar-bottom"><a href="#settings" data-page="settings"><span class="nav-icon">⚙</span>Settings</a><p class="system-id"><span></span> SYSTEM ONLINE</p></div>
-      </aside>
-      <main class="main-content">
-        <header class="topbar"><button class="menu-button" id="menuButton" aria-label="Open navigation">☰</button><div class="breadcrumb"><span id="sectionName">Command Center</span><span class="top-status"><i></i> All systems nominal</span></div><div class="top-actions"><button class="icon-button" id="commandButton" aria-label="Open command palette" title="Command palette (Ctrl+K)">⌘</button><button class="icon-button" id="themeToggle" aria-label="Toggle display mode">◐</button><button class="profile" id="profileButton" aria-label="Open profile">DC</button></div></header>
-        <div id="app" class="page-stage" aria-live="polite"></div>
-      </main>
-    </div>
-    <template id="emptyState"><div class="empty-state"><span>◎</span><h2>Nothing here yet</h2><p>This space is ready when you are.</p></div></template>
-    <dialog class="app-dialog" id="modal"></dialog>
-    <dialog class="command-dialog" id="commandPalette"><form method="dialog"><input id="commandSearch" placeholder="Type a command or page name…" autofocus><div id="commandResults"></div><button class="dialog-close" value="cancel" aria-label="Close">×</button></form></dialog>
-    <script type="module" src="js/app.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DexieOS — osobiste centrum projektów, notatek i codziennych informacji.">
+  <title>DexieOS</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">D</div>
+        <div>
+          <strong>DexieOS</strong>
+          <span>Personal Command Center</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Główna nawigacja">
+        <button class="nav-item active" data-view="dashboard">⌂ <span>Dashboard</span></button>
+        <button class="nav-item" data-view="projects">▦ <span>Projekty</span></button>
+        <button class="nav-item" data-view="notes">✎ <span>Notatki</span></button>
+        <button class="nav-item" data-view="timeline">◷ <span>Timeline</span></button>
+        <button class="nav-item" data-view="knowledge">⌘ <span>Wiedza</span></button>
+        <button class="nav-item" data-view="changelog">↻ <span>Changelog</span></button>
+        <button class="nav-item" data-view="settings">⚙ <span>Ustawienia</span></button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="exportDataBtn" class="ghost-btn">Eksport danych</button>
+        <label class="ghost-btn file-label">
+          Import danych
+          <input id="importDataInput" type="file" accept="application/json" hidden>
+        </label>
+        <small>DexieOS v1.0</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="menuBtn" class="icon-btn mobile-only" aria-label="Otwórz menu">☰</button>
+        <div class="search-wrap">
+          <input id="globalSearch" type="search" placeholder="Szukaj projektów, notatek i wpisów…" autocomplete="off">
+          <div id="searchResults" class="search-results hidden"></div>
+        </div>
+        <div class="topbar-actions">
+          <button id="quickNoteBtn" class="secondary-btn">+ Notatka</button>
+          <button id="quickProjectBtn" class="primary-btn">+ Projekt</button>
+        </div>
+      </header>
+
+      <section id="view-dashboard" class="view active">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">Southampton, United Kingdom</p>
+            <h1>Witaj, Kamil.</h1>
+            <p class="hero-copy">Twoje projekty, notatki i codzienny kontekst w jednym miejscu.</p>
+          </div>
+          <div class="clock-card">
+            <span id="currentDate">—</span>
+            <strong id="currentTime">—</strong>
+            <span>Europe/London</span>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="panel weather-panel">
+            <div class="panel-head">
+              <div>
+                <span class="panel-kicker">Pogoda</span>
+                <h2>Southampton</h2>
+              </div>
+              <button id="refreshWeatherBtn" class="icon-btn" aria-label="Odśwież pogodę">↻</button>
+            </div>
+            <div id="weatherContent" class="weather-content">
+              <div class="weather-main">
+                <span class="weather-icon">◌</span>
+                <strong>Ładowanie…</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="panel-kicker">Status</span>
+                <h2>Aktualny fokus</h2>
+              </div>
+            </div>
+            <div id="focusCard" class="focus-card"></div>
+          </article>
+
+          <article class="panel span-2">
+            <div class="panel-head">
+              <div>
+                <span class="panel-kicker">Projekty</span>
+                <h2>Aktywne</h2>
+              </div>
+              <button class="text-btn" data-open-view="projects">Zobacz wszystkie</button>
+            </div>
+            <div id="dashboardProjects" class="project-grid compact"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="panel-kicker">Notatki</span>
+                <h2>Ostatnie wpisy</h2>
+              </div>
+              <button class="text-btn" data-open-view="notes">Otwórz</button>
+            </div>
+            <div id="recentNotes" class="stack-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="panel-kicker">Skróty</span>
+                <h2>Szybkie akcje</h2>
+              </div>
+            </div>
+            <div class="quick-actions">
+              <button data-action="new-project">Nowy projekt</button>
+              <button data-action="new-note">Nowa notatka</button>
+              <button data-open-view="timeline">Dodaj wydarzenie</button>
+              <a href="https://github.com/CamileGX/camilegx.github.io" target="_blank" rel="noreferrer">Otwórz GitHub</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-projects" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Workspace</p>
+            <h1>Projekty</h1>
+            <p>Dodawaj, edytuj, filtruj i śledź postęp bez grzebania w kodzie.</p>
+          </div>
+          <button id="addProjectBtn" class="primary-btn">+ Nowy projekt</button>
+        </div>
+        <div class="toolbar">
+          <select id="projectStatusFilter">
+            <option value="all">Wszystkie statusy</option>
+            <option value="active">Aktywne</option>
+            <option value="planned">Planowane</option>
+            <option value="paused">Wstrzymane</option>
+            <option value="done">Zakończone</option>
+          </select>
+        </div>
+        <div id="projectsGrid" class="project-grid"></div>
+      </section>
+
+      <section id="view-notes" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Personal knowledge</p>
+            <h1>Notatki</h1>
+            <p>Prosty edytor z autosave, kategoriami i wyszukiwaniem.</p>
+          </div>
+          <button id="addNoteBtn" class="primary-btn">+ Nowa notatka</button>
+        </div>
+        <div class="notes-layout">
+          <aside class="notes-list-panel">
+            <div class="notes-filter">
+              <input id="notesSearch" type="search" placeholder="Szukaj notatek…">
+              <select id="notesCategoryFilter">
+                <option value="all">Wszystkie kategorie</option>
+              </select>
+            </div>
+            <div id="notesList" class="notes-list"></div>
+          </aside>
+          <article class="note-editor-panel">
+            <div id="emptyNoteState" class="empty-state">
+              <h2>Wybierz notatkę</h2>
+              <p>Albo utwórz nową i zacznij pisać.</p>
+            </div>
+            <form id="noteEditor" class="note-editor hidden">
+              <input id="noteTitle" class="note-title-input" placeholder="Tytuł notatki">
+              <div class="note-meta-row">
+                <input id="noteCategory" placeholder="Kategoria">
+                <span id="noteSavedStatus">Zapisano</span>
+              </div>
+              <textarea id="noteContent" placeholder="Pisz tutaj…"></textarea>
+              <div class="editor-actions">
+                <button id="deleteNoteBtn" type="button" class="danger-btn">Usuń notatkę</button>
+              </div>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-timeline" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">History</p>
+            <h1>Timeline</h1>
+            <p>Ważne wydarzenia, kamienie milowe i plany.</p>
+          </div>
+          <button id="addTimelineBtn" class="primary-btn">+ Dodaj wydarzenie</button>
+        </div>
+        <div id="timelineList" class="timeline-list"></div>
+      </section>
+
+      <section id="view-knowledge" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Reference</p>
+            <h1>Baza wiedzy</h1>
+            <p>Krótkie, uporządkowane wpisy, które łatwo później znaleźć.</p>
+          </div>
+          <button id="addKnowledgeBtn" class="primary-btn">+ Dodaj wpis</button>
+        </div>
+        <div id="knowledgeGrid" class="knowledge-grid"></div>
+      </section>
+
+      <section id="view-changelog" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Updates</p>
+            <h1>Changelog</h1>
+            <p>Co zmieniło się w DexieOS.</p>
+          </div>
+          <button id="addChangelogBtn" class="primary-btn">+ Dodaj wpis</button>
+        </div>
+        <div id="changelogList" class="changelog-list"></div>
+      </section>
+
+      <section id="view-settings" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Preferences</p>
+            <h1>Ustawienia</h1>
+            <p>Dopasuj wygląd i zachowanie aplikacji.</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <article class="panel setting-card">
+            <h2>Motyw</h2>
+            <select id="themeSelect">
+              <option value="dark">Ciemny</option>
+              <option value="light">Jasny</option>
+            </select>
+          </article>
+          <article class="panel setting-card">
+            <h2>Kolor akcentu</h2>
+            <input id="accentColor" type="color" value="#7c8cff">
+          </article>
+          <article class="panel setting-card">
+            <h2>Animacje</h2>
+            <label class="switch-row">
+              <span>Włączone</span>
+              <input id="animationsToggle" type="checkbox" checked>
+            </label>
+          </article>
+          <article class="panel setting-card">
+            <h2>Dane</h2>
+            <button id="resetDataBtn" class="danger-btn">Przywróć dane startowe</button>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="projectDialog" class="modal">
+    <form id="projectForm" method="dialog">
+      <div class="modal-head">
+        <div>
+          <span class="panel-kicker">Projekt</span>
+          <h2 id="projectDialogTitle">Nowy projekt</h2>
+        </div>
+        <button type="button" class="icon-btn" data-close-dialog="projectDialog">×</button>
+      </div>
+      <input id="projectId" type="hidden">
+      <label>Nazwa<input id="projectName" required></label>
+      <label>Opis<textarea id="projectDescription" rows="4"></textarea></label>
+      <div class="form-grid">
+        <label>Status
+          <select id="projectStatus">
+            <option value="active">Aktywny</option>
+            <option value="planned">Planowany</option>
+            <option value="paused">Wstrzymany</option>
+            <option value="done">Zakończony</option>
+          </select>
+        </label>
+        <label>Priorytet
+          <select id="projectPriority">
+            <option value="high">Wysoki</option>
+            <option value="medium">Średni</option>
+            <option value="low">Niski</option>
+          </select>
+        </label>
+      </div>
+      <label>Postęp <span id="projectProgressValue">0%</span>
+        <input id="projectProgress" type="range" min="0" max="100" value="0">
+      </label>
+      <label>Link<input id="projectLink" type="url" placeholder="https://…"></label>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" data-close-dialog="projectDialog">Anuluj</button>
+        <button type="submit" class="primary-btn">Zapisz projekt</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="simpleEntryDialog" class="modal">
+    <form id="simpleEntryForm" method="dialog">
+      <div class="modal-head">
+        <div>
+          <span class="panel-kicker" id="simpleEntryKicker">Wpis</span>
+          <h2 id="simpleEntryTitle">Dodaj wpis</h2>
+        </div>
+        <button type="button" class="icon-btn" data-close-dialog="simpleEntryDialog">×</button>
+      </div>
+      <input id="simpleEntryType" type="hidden">
+      <label>Tytuł<input id="simpleEntryName" required></label>
+      <label>Data<input id="simpleEntryDate" type="date"></label>
+      <label>Treść<textarea id="simpleEntryContent" rows="6"></textarea></label>
+      <label>Tagi / kategoria<input id="simpleEntryTags" placeholder="np. GitHub, życie, pomysł"></label>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" data-close-dialog="simpleEntryDialog">Anuluj</button>
+        <button type="submit" class="primary-btn">Zapisz</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
 </html>

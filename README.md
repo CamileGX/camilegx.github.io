@@ -1,55 +1,68 @@
 # DexieOS
 
-DexieOS is a private, local-first personal operating system built as a static GitHub Pages application. It is designed to be a browser homepage: a focused command centre for links, work, notes, knowledge, local files, and personal integrations.
+Osobiste centrum projektów, notatek i codziennych informacji dla Kamila.
 
-## What it includes
+## Funkcje
 
-- A responsive dashboard with local clock, quick launch, system overview, projects, weather, and GitHub activity
-- Editable browser-local shortcuts for Google, YouTube, ChatGPT, GitHub, Discord, Steam, Xbox, Reddit, Gmail, Drive, Calendar, Replit, and more
-- Interactive projects with persistent notes and todo lists
-- Five purpose-built assistant workspaces: Dexie, Coding, Research, Creative, and System
-- Searchable Knowledge Base and Markdown-aware notes
-- Local notes with autosave, folders, sorting, searching, rename, duplicate, and confirmed deletion
-- A locally persisted timeline with addable milestones
-- A real local file manager powered by the browser File System Access API: select a workspace, upload, drag-and-drop, rename, delete, search, filter, preview, and download/open files
-- Settings for light/dark/dim themes, timezone fallback, and local data reset
+- dashboard z czasem i datą dla `Europe/London`,
+- aktualna pogoda dla Southampton przez Open-Meteo,
+- dodawanie, edycja i usuwanie projektów,
+- notatki z autosave i kategoriami,
+- timeline,
+- baza wiedzy,
+- changelog,
+- globalna wyszukiwarka,
+- motyw jasny/ciemny i wybór koloru akcentu,
+- eksport i import wszystkich danych do JSON,
+- przechowywanie danych w `localStorage`,
+- pełna zgodność z GitHub Pages.
 
-## Architecture
-
-DexieOS deliberately uses no framework, build tooling, server, or database. It is a small ES-module application which can run directly on GitHub Pages.
+## Struktura
 
 ```text
-├── assets/       Static media and future visual assets
-├── components/   Reusable view templates
-├── css/          Design tokens, responsive layout, and component styles
-├── js/           Router, page controllers, and application data
-├── modules/      Presentation utilities (for example Markdown rendering)
-├── pages/        Page-layer documentation and module boundary
-├── services/     Browser capabilities and external API adapters
-├── storage/      Namespaced localStorage persistence layer
-└── index.html    Application shell and accessible dialog primitives
+index.html
+css/
+  styles.css
+js/
+  app.js
+README.md
 ```
 
-### Local-first data
+## Uruchomienie lokalne
 
-Notes, shortcuts, project details, settings, timeline milestones, and integration identifiers are stored under the `dexieos:` namespace in the current browser's `localStorage`. No personal content is sent to a DexieOS server because there is no DexieOS server.
+Nie otwieraj projektu przez `file://`, ponieważ JavaScript korzysta z modułów.
 
-The Files page intentionally does not simulate file management. In Chromium-based browsers served over HTTPS or localhost, select the workspace folder you want to manage when prompted. The File System Access API grants access only after you explicitly select a folder, as required by browser security. The browser may retain that permission for the current origin, but DexieOS never receives unrestricted disk access.
+W folderze projektu uruchom jeden z serwerów:
 
-### Integrations
+```bash
+python -m http.server 8000
+```
 
-- **Weather**: requests browser geolocation only when you choose “Use my location,” then fetches current conditions and city name from Open-Meteo.
-- **GitHub**: accepts a username and uses GitHub’s public API for recently updated repositories. Authentication and private-repository support are deliberately not requested.
-- **Google account integration**: intentionally disabled until a real OAuth configuration is added. DexieOS does not ship a fake sign-in flow or placeholder credentials.
+Następnie otwórz:
 
-## Local development
+```text
+http://localhost:8000
+```
 
-Serve the project through a local HTTP server for development and interface review; do not open it with `file://`. This ensures ES modules, browser storage, and secure browser APIs resolve correctly. Google sign-in and the Files page additionally require `localhost` or GitHub Pages because they need a secure context. There are no packages to install and no build step.
+Możesz też użyć rozszerzenia Live Server w VS Code.
 
-## Roadmap
+## Publikacja na GitHub Pages
 
-1. Encrypted optional export/import for local content
-2. Authenticated GitHub dashboard with contribution history
-3. Opt-in Google Drive, Calendar, and Gmail adapters
-4. Richer Markdown preview and knowledge article authoring
-5. Installable PWA shell for offline desktop-like use
+Repozytorium użytkownika `CamileGX/camilegx.github.io` powinno publikować stronę bez dodatkowej konfiguracji z gałęzi `main`.
+
+Wszystkie ścieżki są względne:
+
+```html
+./css/styles.css
+./js/app.js
+```
+
+Dzięki temu projekt działa zarówno lokalnie przez serwer HTTP, jak i na GitHub Pages.
+
+## Pogoda
+
+Pogoda jest pobierana z publicznego API Open-Meteo dla współrzędnych Southampton. Nie jest wymagany klucz API. Ostatnia poprawna odpowiedź jest zapisywana w pamięci przeglądarki jako fallback.
+
+## Dane użytkownika
+
+Dane projektów, notatek i ustawień pozostają lokalnie w przeglądarce. Używaj regularnie przycisku **Eksport danych**, aby utworzyć kopię zapasową JSON.
